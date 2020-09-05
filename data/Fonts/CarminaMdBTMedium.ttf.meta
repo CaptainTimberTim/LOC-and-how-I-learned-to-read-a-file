@@ -1,0 +1,26 @@
+fileFormatVersion: 2
+guid: 447fd16d39fb8a242953904413501e2f
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Carmina Md BT
+  fontNames:
+  - Carmina Md BT
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 0991ee335f1fd0249babbda12bc52a9c, type: 3}
+  - {fileID: 12800000, guid: 3f2162889ce34954f8f80435b8fd96a7, type: 3}
+  - {fileID: 12800000, guid: 2d7c5ddc9ea654047bb338c88103e6ba, type: 3}
+  - {fileID: 12800000, guid: 272033cf19f51584c91974b799079ea3, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
