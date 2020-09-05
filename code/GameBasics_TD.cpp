@@ -58,7 +58,7 @@ FindAllCodeFilesInFolder(memory_bucket_container *Bucket, string_compound *Folde
     if(FileHandle != INVALID_HANDLE_VALUE)
     {
         b32 HasNextFile = true;
-        string_compound FileType = NewStringCompound(&Bucket->Parent->Transient, 16);
+        string_compound FileType = NewStringCompound(&Bucket->Parent->Transient, 255);
         
         while(HasNextFile && ResultingFileInfo->Count < ResultingFileInfo->MaxCount)
         {
@@ -219,7 +219,6 @@ OnConfirm(void *Data)
     game_state *GameState = (game_state *)Data;
     
     GameState->DoCodeFileSearch = true;
-    
 }
 
 
@@ -355,6 +354,26 @@ CountNumerals(u32 Number)
     return Result;
 }
 
+inline void
+RemoveFileStuff(ui_holder *UIHolder)
+{
+    ResetStringCompound(*UIHolder->FileNamesS);
+    ResetStringCompound(*UIHolder->LOCTotalS);
+    ResetStringCompound(*UIHolder->LOCS);
+    RemoveRenderText(UIHolder->FileNamesRT);
+    RemoveRenderText(UIHolder->LOCTotalRT);
+    RemoveRenderText(UIHolder->LOCRT);
+    For(*UIHolder->RowCount) 
+    {
+        if( (*UIHolder->Rows)[It]->ID >= 0) 
+        {
+            RemoveFromTransformList(&GlobalGameState.Renderer.TransformList, (*UIHolder->Rows)[It]);
+            RemoveRenderEntry((*UIHolder->Rows)[It]);
+        }
+    }
+    
+    ReadyUpEntryList(&GlobalGameState.Renderer.RenderEntryList);
+}
 
 
 

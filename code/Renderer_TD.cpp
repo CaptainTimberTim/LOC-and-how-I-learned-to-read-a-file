@@ -525,6 +525,7 @@ CreateRenderEntry(renderer *Renderer, v2 Size, r32 Depth, v2 Position = {}, entr
     }
     Assert(Result);
     Assert(Depth <= 1.0f && Depth >= -1.0f);
+    Assert(EntryList->EntryCount < EntryList->MaxCount);
     
     render_entry *Entry = EntryList->Entries + EntryList->EntryCount;
     Entry->ID = Result;
@@ -983,79 +984,79 @@ CreateScreenTransformList(memory_bucket_container *Bucket, u32 Size)
     Result.OriginalPosition = PushArrayOnBucket(Bucket, Size, v2);
     Result.DoTranslation = PushArrayOnBucket(Bucket, Size, fixed_to);
     Result.DoScale       = PushArrayOnBucket(Bucket, Size, scale_axis);
+    Result.OpenSlots     = PushArrayOnBucket(Bucket, Size, b32);
     Result.MaxCount      = Size;
     
     return Result;
 }
 
-inline u32
-TranslateWithScreen(screen_transform_list *List, entry_id *Entry, fixed_to FixedTo)
+inline void
+RemoveFromTransformList(screen_transform_list *List, entry_id *Entry)
 {
-    Assert(List->Count < List->MaxCount);
-    List->Entries[List->Count] = Entry;
-    List->DoTranslation[List->Count] = FixedTo;
-    List->OriginalPosition[List->Count] = GetPosition(Entry);
-    return List->Count++;
-}
-
-
-inline u32 
-TranslateWithScreen(screen_transform_list *List, entry_id *Entry, fixed_to FixedTo, r32 FixToPosition)
-{
-    Assert(List->Count < List->MaxCount);
-    List->FixToPosition[List->Count].x = FixToPosition;
-    List->FixToPosition[List->Count].y = FixToPosition;
-    List->OriginalPosition[List->Count] = GetPosition(Entry);
-    return TranslateWithScreen(List, Entry, FixedTo);
-}
-
-inline u32 
-TranslateWithScreen(screen_transform_list *List, entry_id *Entry, fixed_to FixedTo, v2  FixToPosition)
-{
-    Assert(List->Count < List->MaxCount);
-    List->FixToPosition[List->Count] = FixToPosition;
-    List->OriginalPosition[List->Count] = GetPosition(Entry);
-    return TranslateWithScreen(List, Entry, FixedTo);
+    For(List->Count)
+    {
+        if(List->Entries[It] == Entry)
+        {
+            List->OpenSlots[It] = true;
+            List->OpenSlotCount++;
+            break;
+        }
+    }
 }
 
 inline u32
-ScaleWithScreen(screen_transform_list *List, entry_id *Entry, scale_axis ScaleAxis)
+TransformWithScreen(screen_transform_list *List, entry_id *Entry, fixed_to FixedTo, scale_axis ScaleAxis, v2 FixToPosition)
 {
-    Assert(List->Count < List->MaxCount);
-    List->Entries[List->Count] = Entry;
-    List->DoScale[List->Count] = ScaleAxis;
-    List->OriginalPosition[List->Count] = GetPosition(Entry);
-    return List->Count++;
-}
-
-inline u32
-TransformWithScreen(screen_transform_list *List, entry_id *Entry, fixed_to FixedTo, scale_axis ScaleAxis)
-{
-    Assert(List->Count < List->MaxCount);
-    List->Entries[List->Count] = Entry;
-    List->DoTranslation[List->Count] = FixedTo;
-    List->DoScale[List->Count] = ScaleAxis;
-    List->OriginalPosition[List->Count] = GetPosition(Entry);
-    return List->Count++;
+    i32 ID = -1;
+    if(List->OpenSlotCount > 0)
+    {
+        For(List->Count)
+        {
+            if(List->OpenSlots[It])
+            {
+                ID = It;
+                List->OpenSlots[It] = false;
+                List->OpenSlotCount--;
+                break;
+            }
+        }
+    }
+    else 
+    {
+        Assert(List->Count < List->MaxCount);
+        ID = List->Count++;
+    }
+    
+    List->Entries[ID]          = Entry;
+    List->FixToPosition[ID]    = FixToPosition;
+    List->OriginalPosition[ID] = GetPosition(Entry);
+    List->DoTranslation[ID]    = FixedTo;
+    List->DoScale[ID]          = ScaleAxis;
+    return ID;
 }
 
 inline u32 
 TransformWithScreen(screen_transform_list *List, entry_id *Entry, fixed_to FixedTo, scale_axis ScaleAxis, r32 FixToPosition)
 {
-    Assert(List->Count < List->MaxCount);
-    List->FixToPosition[List->Count].x = FixToPosition;
-    List->FixToPosition[List->Count].y = FixToPosition;
-    List->OriginalPosition[List->Count] = GetPosition(Entry);
-    return TransformWithScreen(List, Entry, FixedTo, ScaleAxis);
+    return TransformWithScreen(List, Entry, FixedTo, ScaleAxis, {FixToPosition, FixToPosition});
 }
 
 inline u32 
-TransformWithScreen(screen_transform_list *List, entry_id *Entry, fixed_to FixedTo, scale_axis ScaleAxis, v2 FixToPosition)
+TranslateWithScreen(screen_transform_list *List, entry_id *Entry, fixed_to FixedTo, r32 FixToPosition)
 {
-    Assert(List->Count < List->MaxCount);
-    List->FixToPosition[List->Count] = FixToPosition;
-    List->OriginalPosition[List->Count] = GetPosition(Entry);
-    return TransformWithScreen(List, Entry, FixedTo, ScaleAxis);
+    return TransformWithScreen(List, Entry, FixedTo, scaleAxis_None, {FixToPosition, FixToPosition});
+}
+
+inline u32 
+TranslateWithScreen(screen_transform_list *List, entry_id *Entry, fixed_to FixedTo, v2  FixToPosition)
+{
+    return TransformWithScreen(List, Entry, FixedTo, scaleAxis_None, FixToPosition);
+}
+
+inline u32
+ScaleWithScreen(screen_transform_list *List, entry_id *Entry, scale_axis ScaleAxis)
+{
+    return TransformWithScreen(List, Entry, fixedTo_None, ScaleAxis);
 }
 
 inline void 
@@ -1164,10 +1165,12 @@ CreateRenderText(renderer *Renderer, render_text_atlas *Atlas, string_c *Text,
     r32 OldBaseline = TestQ.y1;
     
     ResultText->RenderEntries[ResultText->Count] = CreateRenderRect(Renderer, V2(0), DepthOffset, Color, Parent);
+    Assert(Parent && Parent->ID < (i32)Renderer->RenderEntryList.MaxCount);
     Parent = ResultText->RenderEntries[ResultText->Count++];
+    Assert(Parent && Parent->ID < (i32)Renderer->RenderEntryList.MaxCount);
     
     v2 BaseP = {};
-    Assert(Text->Pos < MAX_CHARACTER_PER_TEXT_INFO);
+    Assert(Text->Pos < MAX_CHARACTER_PER_TEXT_INFO-1);
     For(Text->Pos)
     {
         u8 NextSymbol = Text->S[It];
@@ -1406,9 +1409,22 @@ Quicksort3(render_entry *Entries, i32 Count)
     Quicksort3Recurse(Entries, 0, Count-1);
 }
 
+inline void 
+SuppressRenderEntrySorting(renderer *Renderer, b32 DoSuppress)
+{
+    Renderer->RenderEntryList.SuppressSorting = DoSuppress;
+}
 
-
-
+inline void
+ReadyUpEntryList(render_entry_list *EntryList)
+{
+    if(EntryList->_SortingNeeded) 
+    {
+        EntryList->_SortingNeeded = false;
+        Quicksort3(EntryList->Entries, EntryList->EntryCount);
+        FixUpEntries(EntryList);
+    }
+}
 
 
 

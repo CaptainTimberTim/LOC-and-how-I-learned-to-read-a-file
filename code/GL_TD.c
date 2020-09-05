@@ -162,12 +162,8 @@ DisplayBufferInWindow(HDC DeviceContext, renderer *Renderer)
     
 #if 1
     render_entry_list *EntryList = &Renderer->RenderEntryList;
-    if(EntryList->_SortingNeeded) 
-    {
-        EntryList->_SortingNeeded = false;
-        Quicksort3(EntryList->Entries, EntryList->EntryCount);
-        FixUpEntries(EntryList);
-    }
+    if(!EntryList->SuppressSorting) ReadyUpEntryList(EntryList);
+    
     
     for(u32 EntryID = 0; EntryID < EntryList->EntryCount; EntryID++)
     {

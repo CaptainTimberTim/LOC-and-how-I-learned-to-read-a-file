@@ -57,6 +57,11 @@ struct ui_holder
     render_text *LOCRT;
     render_text *LOCTotalRT;
     render_text *FileNamesRT;
+    string_c *FileNamesS;
+    string_c *LOCTotalS;
+    string_c *LOCS;
+    entry_id ***Rows;
+    u32 *RowCount;
     struct slider *Slider;
 };
 

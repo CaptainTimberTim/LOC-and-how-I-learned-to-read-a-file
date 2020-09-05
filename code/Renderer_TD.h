@@ -221,7 +221,9 @@ struct screen_transform_list
     scale_axis *DoScale;
     u32 MaxCount;
     u32 Count;
-    // TODO:: What happens if entry is deleted?
+    
+    u32 OpenSlotCount;
+    b32 *OpenSlots;
 };
 
 #define START_RENDER_ENTRIES 120000
@@ -238,6 +240,7 @@ struct render_entry_list
     b32 *OpenSlots;
     
     b32 _SortingNeeded;
+    b32 SuppressSorting;
 };
 
 struct renderer
@@ -288,6 +291,7 @@ inline v2 GetExtends(rect Rect);
 inline rect_pe RectToRectPE(rect Rect);
 
 // New Render pipeline
+inline void ReadyUpEntryList(render_entry_list *EntryList);
 internal void FixUpEntries(render_entry_list *EntryList);
 inline render_entry *Get(entry_id *EntryID);
 
@@ -314,14 +318,12 @@ inline void SetTransparency(entry_id *Entry, r32 T);
 inline void ApplyTransform(render_entry *Entry, v3 *Result);
 
 inline screen_transform_list CreateScreenTransformList(memory_bucket_container *Bucket, u32 Size = 128);
-inline u32 TranslateWithScreen(screen_transform_list *List, entry_id *Entry, fixed_to FixedTo);
-inline u32 TranslateWithScreen(screen_transform_list *List, entry_id *Entry, fixed_to FixedTo, r32 FixToPosition);
+inline void RemoveFromTransformList(screen_transform_list *List, entry_id *Entry);
+inline u32 TranslateWithScreen(screen_transform_list *List, entry_id *Entry, fixed_to FixedTo, r32 FixToPosition = 0);
 inline u32 TranslateWithScreen(screen_transform_list *List, entry_id *Entry, fixed_to FixedTo, v2  FixToPosition);
-inline u32 TranslateWithScreen(screen_transform_list *List, entry_id *Entry, fixed_to FixedTo);
 inline u32 ScaleWithScreen(screen_transform_list *List, entry_id *Entry, scale_axis ScaleAxis);
-inline u32 TransformWithScreen(screen_transform_list *List, entry_id *Entry, fixed_to FixedTo, scale_axis ScaleAxis);
 inline u32 TransformWithScreen(screen_transform_list *List, entry_id *Entry, 
-                               fixed_to FixedTo, scale_axis ScaleAxis, r32 FixToPosition);
+                               fixed_to FixedTo, scale_axis ScaleAxis, r32 FixToPosition = 0);
 inline u32 TransformWithScreen(screen_transform_list *List, entry_id *Entry, 
                                fixed_to FixedTo, scale_axis ScaleAxis, v2 FixToPosition);
 inline void ChangeFixToPosition(screen_transform_list *List, u32 ID, r32 NewFixToPosition);
@@ -374,3 +376,5 @@ inline void RemoveRenderText(render_text *Text);
 inline void SetTransparency(render_text *Text, r32 T);
 
 inline void Quicksort3(render_entry *Entries, i32 Count);
+
+inline void SuppressRenderEntrySorting(renderer *Renderer, b32 DoSuppress);

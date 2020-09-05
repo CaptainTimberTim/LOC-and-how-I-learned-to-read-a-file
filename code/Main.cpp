@@ -578,6 +578,9 @@ WinMain(HINSTANCE Instance,
             UIHolder.LOCRT = &LOCRT;
             UIHolder.LOCTotalRT = &LOCTotalRT;
             UIHolder.FileNamesRT = &FileNamesRT;
+            UIHolder.FileNamesS = &FileNamesS;
+            UIHolder.LOCTotalS = &LOCTotalS;
+            UIHolder.LOCS = &LOCS;
             UIHolder.Slider = &Slider;
             
             entry_id *TextAnchorNames = CreateRenderRect(Renderer, {}, 0, &BGColor, 0);
@@ -594,14 +597,15 @@ WinMain(HINSTANCE Instance,
             
             u32 RowCount = 0;
             entry_id **Rows = PushArrayOnBucket(&GameState->Bucket.Fixed, 2500, entry_id*);
-            
-            
+            UIHolder.Rows = &Rows;
+            UIHolder.RowCount = &RowCount;
             
             // ********************************************
             // FPS ****************************************
             // ********************************************
             
-#if DEBUG_TD 
+            
+#if DEBUG_TD_
             r32 FPSList[100] = {};
             u32 FPSCount = 0;
             v3 NOP = {};
@@ -621,7 +625,7 @@ WinMain(HINSTANCE Instance,
                 PrevCycleCount = CurrentCycleCount;
                 GameState->Time.GameTime += GameState->Time.dTime;
                 
-#if DEBUG_TD
+#if DEBUG_TD_
                 FPSList[FPSCount] = (1.0f/GameState->Time.dTime);
                 r32 CurrentFPS = 0;
                 For(100) CurrentFPS += FPSList[It];
@@ -680,6 +684,10 @@ WinMain(HINSTANCE Instance,
                 {
                     OnConfirm(GameState);
                 }
+                else if(TFResult.Flag & processTextField_TextChanged)
+                {
+                    RemoveFileStuff(&UIHolder);
+                }
                 
                 if(Input->WheelAmount != 0)
                 {
@@ -695,13 +703,7 @@ WinMain(HINSTANCE Instance,
                     u32 TotalCount = 0;
                     u32 NoWhitespaceCount = 0;
                     CodeFiles.Count = 0;
-                    ResetStringCompound(FileNamesS);
-                    ResetStringCompound(LOCTotalS);
-                    ResetStringCompound(LOCS);
-                    RemoveRenderText(&FileNamesRT);
-                    RemoveRenderText(&LOCTotalRT);
-                    RemoveRenderText(&LOCRT);
-                    For(RowCount) RemoveRenderEntry(Rows[It]);
+                    RemoveFileStuff(&UIHolder);
                     ResetStringCompound(SearchFolder);
                     AppendStringCompoundToCompound(&SearchFolder, &TextField.TextString);
                     
@@ -725,10 +727,10 @@ WinMain(HINSTANCE Instance,
                         {
                             u32 LOCTotal = CountEveryLinebreak(CodeFiles.FileData[It]);
                             Push(&LOC_All, LOCTotal);
-                            Push(&LOCData.LOC, LOCTotal);
                             TotalCount += LOCTotal;
                             u32 LOC_    = CountLinebreaksAndNoWhitespaces(CodeFiles.FileData[It]);
                             Push(&LOC, LOC_);
+                            Push(&LOCData.LOC, LOC_);
                             NoWhitespaceCount += LOC_;
                             Push(&LOCData.Count, It);
                         }
