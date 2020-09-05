@@ -595,6 +595,8 @@ WinMain(HINSTANCE Instance,
             u32 RowCount = 0;
             entry_id **Rows = PushArrayOnBucket(&GameState->Bucket.Fixed, 2500, entry_id*);
             
+            
+            
             // ********************************************
             // FPS ****************************************
             // ********************************************
@@ -733,8 +735,14 @@ WinMain(HINSTANCE Instance,
                         
                         QuickSortLOC(0, CodeFiles.Count-1, &LOCData);
                         
+                        string_c Space = NewStaticStringCompound("  ");
                         For(CodeFiles.Count)
                         {
+                            I32ToString(&FileNamesS, It+1);
+                            AppendCharToCompound(&FileNamesS, '.');
+                            For((CountNumerals(CodeFiles.Count)-CountNumerals(It+1)+1), In) 
+                                AppendStringCompoundToCompound(&FileNamesS, &Space);
+                            
                             u32 ID = Get(&LOCData.Count, It);
                             ConcatStringCompounds(4, &FileNamesS, CodeFiles.SubPath+ID, CodeFiles.FileName+ID, &LineBreak);
                             I32ToString(&LOCTotalS, Get(&LOC_All, ID));

@@ -336,6 +336,21 @@ QuickSortLOC(i32 Low, i32 High, loc_data *SortArray)
     }
 } 
 
+inline u32
+CountNumerals(u32 Number)
+{
+    u32 Result = 1;
+    
+    u32 Counter = 10;
+    while(Number >= Counter) 
+    {
+        Result++;
+        Counter *= 10;
+    }
+    
+    
+    return Result;
+}
 
 
 
