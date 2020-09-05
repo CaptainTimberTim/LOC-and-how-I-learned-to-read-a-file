@@ -10,7 +10,7 @@ The specification is extremely simple. On each line is _one_ file extension with
 The base principle for this project is to do _almost_ everything myself. The only libraries included are the stb_image.h and stb_truetype.h for image and font loading.
 Everything else is written by me. <br>
 Many things are hardcoded at this point and may fail for extremely large codebases. 
-I tested it on my whole programming directory which consists of X files amounting to around 500k of code. 
+I tested it on my whole programming directory which consists of 1484 files amounting to around 500k of code. 
 
 <br><br><br>
 # Building the repository
