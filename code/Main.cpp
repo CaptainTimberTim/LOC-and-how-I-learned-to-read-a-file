@@ -770,13 +770,14 @@ WinMain(HINSTANCE Instance,
                         
                         entry_id *RowParent = FileNamesRT.RenderEntries[0];
                         r32 OffsetY = -2;
+                        RowCount = 0;
                         For(CodeFiles.Count+2)
                         {
                             if(It%2==0)
                             {
-                                Rows[It] = CreateRenderRect(Renderer, V2(WWidth*10, 22), 0.5f, &BGColorMuted, RowParent);
-                                Translate(Rows[It], V2(0, OffsetY));
-                                ScaleWithScreen(&Renderer->TransformList, Rows[It], scaleAxis_X);
+                                Rows[RowCount] = CreateRenderRect(Renderer, V2(WWidth*10, 22), 0.5f, &BGColorMuted, RowParent);
+                                Translate(Rows[RowCount], V2(0, OffsetY));
+                                ScaleWithScreen(&Renderer->TransformList, Rows[RowCount], scaleAxis_X);
                                 
                                 OffsetY -= 44;
                                 RowCount++;
