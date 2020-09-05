@@ -98,17 +98,20 @@ FindAllCodeFilesInFolder(memory_bucket_container *Bucket, string_compound *Folde
                         }
                         if(CorrectExtension)
                         {
-                            ResultingFileInfo->SubPath[ResultingFileInfo->Count] = NewStringCompound(Bucket, SubPath->Pos);
-                            AppendStringCompoundToCompound(ResultingFileInfo->SubPath+ResultingFileInfo->Count, SubPath);
-                            ResultingFileInfo->FileName[ResultingFileInfo->Count] = NewStringCompound(Bucket, FileName.Pos);
-                            AppendStringCompoundToCompound(ResultingFileInfo->FileName+ResultingFileInfo->Count, &FileName);
-                            
-                            string_c FilePath = NewStringCompound(&Bucket->Parent->Transient, 255);
-                            ConcatStringCompounds(4, &FilePath, FolderPath, SubPath, &FileName);
-                            if(!ReadEntireFile(Bucket, ResultingFileInfo->FileData+ResultingFileInfo->Count, FilePath.S)) Assert(false);
-                            DeleteStringCompound(&Bucket->Parent->Transient, &FilePath);
-                            
-                            ResultingFileInfo->Count++;
+                            if(ResultingFileInfo->Count < MAX_FILES)
+                            {
+                                ResultingFileInfo->SubPath[ResultingFileInfo->Count] = NewStringCompound(Bucket, SubPath->Pos);
+                                AppendStringCompoundToCompound(ResultingFileInfo->SubPath+ResultingFileInfo->Count, SubPath);
+                                ResultingFileInfo->FileName[ResultingFileInfo->Count] = NewStringCompound(Bucket, FileName.Pos);
+                                AppendStringCompoundToCompound(ResultingFileInfo->FileName+ResultingFileInfo->Count, &FileName);
+                                
+                                string_c FilePath = NewStringCompound(&Bucket->Parent->Transient, 255);
+                                ConcatStringCompounds(4, &FilePath, FolderPath, SubPath, &FileName);
+                                if(!ReadEntireFile(Bucket, ResultingFileInfo->FileData+ResultingFileInfo->Count, FilePath.S)) Assert(false);
+                                DeleteStringCompound(&Bucket->Parent->Transient, &FilePath);
+                                
+                                ResultingFileInfo->Count++;
+                            }
                             Result = true;
                         }
                         ResetStringCompound(FileType);

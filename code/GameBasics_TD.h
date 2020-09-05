@@ -1,6 +1,7 @@
 #pragma once
 #include "Renderer_TD.h"
 
+#define MAX_FILES 1500
 global_variable string_c SETTINGS_FILE_NAME NewStaticStringCompound("MPlay3Settings.save");
 struct settings
 {

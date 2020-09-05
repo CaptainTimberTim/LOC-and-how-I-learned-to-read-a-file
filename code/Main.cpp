@@ -736,6 +736,7 @@ WinMain(HINSTANCE Instance,
                         QuickSortLOC(0, CodeFiles.Count-1, &LOCData);
                         
                         string_c Space = NewStaticStringCompound("  ");
+                        string_c ShortenedPath = NewStaticStringCompound("..\\");
                         For(CodeFiles.Count)
                         {
                             I32ToString(&FileNamesS, It+1);
@@ -744,7 +745,14 @@ WinMain(HINSTANCE Instance,
                                 AppendStringCompoundToCompound(&FileNamesS, &Space);
                             
                             u32 ID = Get(&LOCData.Count, It);
-                            ConcatStringCompounds(4, &FileNamesS, CodeFiles.SubPath+ID, CodeFiles.FileName+ID, &LineBreak);
+                            if(CodeFiles.SubPath[ID].Pos > 25) 
+                            {
+                                CodeFiles.SubPath[ID].Pos = 25;
+                                AppendStringCompoundToCompound(&FileNamesS, CodeFiles.SubPath+ID);
+                                AppendStringCompoundToCompound(&FileNamesS, &ShortenedPath);
+                            }
+                            else AppendStringCompoundToCompound(&FileNamesS, CodeFiles.SubPath+ID);
+                            ConcatStringCompounds(3, &FileNamesS, CodeFiles.FileName+ID, &LineBreak);
                             I32ToString(&LOCTotalS, Get(&LOC_All, ID));
                             AppendStringCompoundToCompound(&LOCTotalS, &LineBreak);
                             I32ToString(&LOCS, Get(&LOC, ID));
