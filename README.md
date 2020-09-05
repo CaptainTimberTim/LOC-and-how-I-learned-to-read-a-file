@@ -1,6 +1,6 @@
 # LOC or: How I learned to stop UI-Programming and Love the Prompt
 
-Is a small tool that reads all code files in a given directory and it's subdirectories, count the linebreaks -once with whitespaces and once without-, 
+Is a small tool that reads all code files in a given directory and it's subdirectories, counts the linebreaks -once with whitespaces and once without-, 
 sorts them and lastly lists them in descending order.
 Additionally, it tallies all up and gives a total count at the bottom as well.<br>
 The maximum amount of files is 1.5k at the moment. After that it stops collecting more files and lists the found ones. Filepaths longer than 25 symbols before the filename will also be shortened to keep length managable.
