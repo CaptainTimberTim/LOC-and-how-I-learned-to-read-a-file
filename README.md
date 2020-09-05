@@ -1,5 +1,4 @@
-# LOC or: 
-# How I learned to stop UI-Programming and Love the Prompt
+# LOC or: How I learned to stop UI-Programming and Love the Prompt
 
 Is a small tool that reads all code files in a given directory and it's subdirectories, count the linebreaks -once with whitespaces and once without-, 
 sorts them and lastly lists them in descending order.
