@@ -116,7 +116,7 @@ WindowGotResized(game_state *GameState)
         r32 Height = 0;
         if(UIHolder.LOCRT->Count > 0)
         {
-            Height = UIHolder.LOCRT->CurrentP.y-UIHolder.LOCRT->StartP.y;
+            Height = UIHolder.LOCRT->CurrentP.y- UIHolder.LOCRT->StartP.y;
             SetLocalPosition(UIHolder.FileNamesRT, V2(0));
             SetLocalPosition(UIHolder.LOCTotalRT, V2(0));
             SetLocalPosition(UIHolder.LOCRT, V2(0));
@@ -181,7 +181,6 @@ WindowCallback(HWND Window,
                 ReleaseDC(Window, DeviceContext);
             }
         } break;
-        case WM_DESTROY:
         case WM_CLOSE: { IsRunning = false; } break;
         case WM_ACTIVATEAPP: {} break;
         case WM_SYSKEYDOWN:
@@ -448,7 +447,7 @@ WinMain(HINSTANCE Instance,
             
             // Initializing Allocator
             GameState->Bucket = {};
-            if(!CreateBucketAllocator(&GameState->Bucket, Gigabytes(1), Megabytes(500))) return -1;
+            if(!CreateBucketAllocator(&GameState->Bucket, Gigabytes(2), Megabytes(500))) return -1;
             if(!CreateBucketAllocator(&GameState->SoundThreadBucket, Megabytes(1), Megabytes(250))) return -1;
             u8 BucketStatus[100];
             BucketAllocatorFillStatus(&GameState->Bucket, BucketStatus);
@@ -546,14 +545,10 @@ WinMain(HINSTANCE Instance,
             TranslateWithScreen(&Renderer->TransformList, ConfirmBtn->Entry, fixedTo_TopRight);
             
             
-            
-            
             slider Slider = {};
             CreateVerticalSlider(Renderer, &Slider, V2(50, WHeight-120), -0.002f, &UIBGColor,  &UIBGMutedColor);
             Translate(&Slider, V2(WWidth-40, WHeight*0.5f-30));
             TransformWithScreen(&Renderer->TransformList, Slider.Background, fixedTo_RightCenter, scaleAxis_Y);
-            
-            
             
             
             // File counting stuff *****************************
@@ -605,7 +600,7 @@ WinMain(HINSTANCE Instance,
             // ********************************************
             
             
-#if DEBUG_TD_
+#if DEBUG_TD
             r32 FPSList[100] = {};
             u32 FPSCount = 0;
             v3 NOP = {};
@@ -625,7 +620,7 @@ WinMain(HINSTANCE Instance,
                 PrevCycleCount = CurrentCycleCount;
                 GameState->Time.GameTime += GameState->Time.dTime;
                 
-#if DEBUG_TD_
+#if DEBUG_TD
                 FPSList[FPSCount] = (1.0f/GameState->Time.dTime);
                 r32 CurrentFPS = 0;
                 For(100) CurrentFPS += FPSList[It];
@@ -778,7 +773,7 @@ WinMain(HINSTANCE Instance,
                         UpdateVerticalSlideHeightChanged(Renderer, &Slider, LOCRT.CurrentP.y-LOCRT.StartP.y);
                         Slider.SliderIsDragged = true;
                         
-                        entry_id *RowParent = FileNamesRT.RenderEntries[0];
+                        entry_id *RowParent = FileNamesRT.Base;
                         r32 OffsetY = -2;
                         RowCount = 0;
                         For(CodeFiles.Count+2)

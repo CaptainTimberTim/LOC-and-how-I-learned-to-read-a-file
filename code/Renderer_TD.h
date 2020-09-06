@@ -19,6 +19,7 @@ enum render_type
     renderType_NONE,
     renderType_2DBitmap,
     renderType_2DRectangle,
+    renderType_Text,
 };
 
 struct transform_2D
@@ -32,7 +33,7 @@ struct transform_2D
 
 struct entry_id
 {
-    i32 ID;
+    struct render_entry *ID;
 };
 
 struct render_entry
@@ -41,30 +42,37 @@ struct render_entry
     render_type Type;
     b32 Render;
     
-    transform_2D Transform;
     // NOTE:: Vertice[0].z will be set to < -1 when marked for deletion.
     // It will then be deleted on the next render!
     v3 Vertice[4]; // Start bottom-left and goes clockwise
     v2 TexCoords[4];
+    transform_2D Transform;
     
-    struct entry_id *Parent; 
+    enum fixed_to FixedTo;
     
-    u32 TexID;
+    entry_id *Parent; 
+    
     v3 *Color;
     r32 Transparency;
     
-    enum fixed_to FixedTo;
+    // render type specific stuff
+    u32 TexID;
+    struct render_text *Text; // NOTE:: Having the text not in the list is propably not the best for the cache...
+    
+    
     // TODO:: Cache the GLSpace data and us it in (isIn.. functions)
 };
 
-#define MAX_CHARACTER_PER_TEXT_INFO 1024*1024
+#define CHARACTERS_PER_TEXT_INFO 1024*1024
 struct render_text
 {
     v2 CurrentP;
     v2 StartP;
-    entry_id **RenderEntries;
-    v2        *StartPointOffset;
+    entry_id *Base;
+    render_entry *RenderEntries;
+    v2           *StartPointOffset;
     u32 Count;
+    u32 MaxCount;
 };
 
 #define ATLAS_LETTER_COUNT 255
@@ -293,7 +301,6 @@ inline rect_pe RectToRectPE(rect Rect);
 // New Render pipeline
 inline void ReadyUpEntryList(render_entry_list *EntryList);
 internal void FixUpEntries(render_entry_list *EntryList);
-inline render_entry *Get(entry_id *EntryID);
 
 inline button *NewButton(renderer *Renderer, rect Rect, r32 Depth, b32 IsToggle,
                          string_c *BtnPath, v3 *BaseColor, v3 *DownColor, v3 *HoverColor, string_c *IconPath, v3 *IconColor,

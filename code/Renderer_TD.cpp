@@ -176,21 +176,21 @@ NewButton(renderer *Renderer, rect Rect, r32 Depth, b32 IsToggle,
     Assert(Renderer->ButtonGroup.Count < MAX_BUTTONS);
     button *Result = Renderer->ButtonGroup.Buttons + Renderer->ButtonGroup.Count++;
     Result->Entry = CreateRenderBitmap(Renderer, Rect, Depth, Parent, BtnPath);
-    Get(Result->Entry)->Color = BaseColor;
+    Result->Entry->ID->Color = BaseColor;
     Result->BaseColor = BaseColor;
     Result->DownColor = DownColor;
     Result->HoverColor = HoverColor;
     Result->IsToggle = IsToggle;
     
-    Result->Icon = CreateRenderBitmap(Renderer, Rect, Depth-0.0000001f, Parent, IconPath);
-    Get(Result->Icon)->Color = IconColor;
+    Result->Icon = CreateRenderBitmap(Renderer, Rect, Depth-0.0000001f, Result->Entry, IconPath);
+    Result->Icon->ID->Color = IconColor;
     
     if(IsToggle)
     {
         Assert(ToggleIconPath);
-        Result->ToggleIcon = CreateRenderBitmap(Renderer, Rect, Depth-0.0000001f, Parent, ToggleIconPath);
-        Get(Result->ToggleIcon)->Render = false;
-        Get(Result->ToggleIcon)->Color = IconColor;
+        Result->ToggleIcon = CreateRenderBitmap(Renderer, Rect, Depth-0.0000001f, Result->Entry, ToggleIconPath);
+        Result->ToggleIcon->ID->Render = false;
+        Result->ToggleIcon->ID->Color = IconColor;
     }
     
     return Result;
@@ -205,7 +205,7 @@ NewButton(renderer *Renderer, rect Rect, r32 Depth, b32 IsToggle,
     Assert(Renderer->ButtonGroup.Count < MAX_BUTTONS);
     button *Result = Renderer->ButtonGroup.Buttons + Renderer->ButtonGroup.Count++;
     Result->Entry = CreateRenderBitmap(Renderer, Rect, Depth, Parent, ButtonBitmapID);
-    Get(Result->Entry)->Color = BaseColor;
+    Result->Entry->ID->Color = BaseColor;
     Result->BaseColor = BaseColor;
     Result->DownColor = DownColor;
     Result->HoverColor = HoverColor;
@@ -213,14 +213,14 @@ NewButton(renderer *Renderer, rect Rect, r32 Depth, b32 IsToggle,
     
     
     Result->Icon = CreateRenderBitmap(Renderer, Rect, Depth-0.0000001f, Result->Entry, IconBitmapID);
-    Get(Result->Icon)->Color = IconColor;
+    Result->Icon->ID->Color = IconColor;
     
     if(IsToggle)
     {
         Assert(ToggleIconBitmapID >= 0);
         Result->ToggleIcon = CreateRenderBitmap(Renderer, Rect, Depth-0.0000001f, Result->Entry, ToggleIconBitmapID);
-        Get(Result->ToggleIcon)->Render = false;
-        Get(Result->ToggleIcon)->Color = IconColor;
+        Result->ToggleIcon->ID->Render = false;
+        Result->ToggleIcon->ID->Color = IconColor;
     }
     
     return Result;
@@ -242,30 +242,30 @@ ButtonTestMouseInteraction(renderer *Renderer, input_info *Input, button *Button
                 if(Button->State != buttonState_Pressed)
                 {
                     Button->State = buttonState_Pressed;
-                    Get(Button->Entry)->Color = Button->DownColor;
-                    Get(Button->Icon)->Render = false;
-                    Get(Button->ToggleIcon)->Render = true;
+                    Button->Entry->ID->Color = Button->DownColor;
+                    Button->Icon->ID->Render = false;
+                    Button->ToggleIcon->ID->Render = true;
                 }
                 else
                 {
                     Button->State = buttonState_Hover;
-                    Get(Button->Entry)->Color = Button->HoverColor;
-                    Get(Button->Icon)->Render = true;
-                    Get(Button->ToggleIcon)->Render = false;
+                    Button->Entry->ID->Color = Button->HoverColor;
+                    Button->Icon->ID->Render = true;
+                    Button->ToggleIcon->ID->Render = false;
                     if(Button->OnHoverEnter.Func) Button->OnHoverEnter.Func(Button->OnHoverEnter.Data);
                 }
             }
             else if(Button->State == buttonState_Unpressed) // Btn starts being hovered
             {
                 Button->State = buttonState_Hover;
-                Get(Button->Entry)->Color = Button->HoverColor;
+                Button->Entry->ID->Color = Button->HoverColor;
                 if(Button->OnHoverEnter.Func) Button->OnHoverEnter.Func(Button->OnHoverEnter.Data);
             }
             else if(Input->KeyChange[KEY_LMB] == KeyUp && 
                     Button->ClickedInBtn) // Btn press ended
             {
                 Button->ClickedInBtn = false;
-                if(!Get(Button->Icon)->Render && Button->OnPressed.Func) Button->OnPressed.Func(Button->OnPressed.Data);
+                if(!Button->Icon->ID->Render && Button->OnPressed.Func) Button->OnPressed.Func(Button->OnPressed.Data);
                 else if(Button->OnPressedToggleOff.Func) Button->OnPressedToggleOff.Func(Button->OnPressed.Data);
             }
         }
@@ -274,15 +274,15 @@ ButtonTestMouseInteraction(renderer *Renderer, input_info *Input, button *Button
             if(Button->State == buttonState_Hover) // Btn being exited
             {
                 Button->State = buttonState_Unpressed;
-                Get(Button->Entry)->Color = Button->BaseColor;
+                Button->Entry->ID->Color = Button->BaseColor;
                 if(Button->OnHoverExit.Func) Button->OnHoverExit.Func(Button->OnHoverExit.Data);
             }
             else if(Input->Pressed[KEY_LMB] && Button->State == buttonState_Pressed &&
                     Button->ClickedInBtn)
             {
                 Button->State = buttonState_Unpressed;
-                Get(Button->Icon)->Render = true;
-                Get(Button->ToggleIcon)->Render = false;
+                Button->Icon->ID->Render = true;
+                Button->ToggleIcon->ID->Render = false;
             }
             if(Input->KeyChange[KEY_LMB] == KeyUp && Button->ClickedInBtn) Button->ClickedInBtn = false;
         }
@@ -294,19 +294,19 @@ ButtonTestMouseInteraction(renderer *Renderer, input_info *Input, button *Button
             if(Input->KeyChange[KEY_LMB] == KeyDown) // Btn starts being pressed down
             {
                 Button->State = buttonState_Pressed;
-                Get(Button->Entry)->Color = Button->DownColor;
+                Button->Entry->ID->Color = Button->DownColor;
             }
             else if(Button->State == buttonState_Unpressed) // Btn starts being hovered
             {
                 Button->State = buttonState_Hover;
-                Get(Button->Entry)->Color = Button->HoverColor;
+                Button->Entry->ID->Color = Button->HoverColor;
                 if(Button->OnHoverEnter.Func) Button->OnHoverEnter.Func(Button->OnHoverEnter.Data);
             }
             else if(Input->KeyChange[KEY_LMB] == KeyUp && 
                     Button->State == buttonState_Pressed) // Btn press ended
             {
                 Button->State = buttonState_Hover;
-                Get(Button->Entry)->Color = Button->HoverColor;
+                Button->Entry->ID->Color = Button->HoverColor;
                 if(Button->OnPressed.Func) Button->OnPressed.Func(Button->OnPressed.Data);
             }
         }
@@ -316,7 +316,7 @@ ButtonTestMouseInteraction(renderer *Renderer, input_info *Input, button *Button
                Button->State == buttonState_Pressed) // Btn being exited
             {
                 Button->State = buttonState_Unpressed;
-                Get(Button->Entry)->Color = Button->BaseColor;
+                Button->Entry->ID->Color = Button->BaseColor;
                 if(Button->OnHoverExit.Func) Button->OnHoverExit.Func(Button->OnHoverExit.Data);
             }
         }
@@ -328,7 +328,7 @@ UpdateButtons(renderer *Renderer, input_info *Input)
 {
     For(Renderer->ButtonGroup.Count)
     {
-        if(Get(Renderer->ButtonGroup.Buttons[It].Entry)->Render) 
+        if(Renderer->ButtonGroup.Buttons[It].Entry->ID->Render) 
             ButtonTestMouseInteraction(Renderer, Input,
                                        Renderer->ButtonGroup.Buttons+It);
     }
@@ -337,25 +337,25 @@ UpdateButtons(renderer *Renderer, input_info *Input)
 inline void
 ActivateButton(button *Button)
 {
-    Get(Button->Entry)->Render = true;
-    Get(Button->Icon)->Render = true;
-    if(Button->ToggleIcon) Get(Button->ToggleIcon)->Render = true;
+    Button->Entry->ID->Render = true;
+    Button->Icon->ID->Render = true;
+    if(Button->ToggleIcon) Button->ToggleIcon->ID->Render = true;
 }
 
 inline void
 DeactivateButton(button *Button)
 {
-    Get(Button->Entry)->Render = false;
-    Get(Button->Icon)->Render = false;
-    if(Button->ToggleIcon) Get(Button->ToggleIcon)->Render = false;
+    Button->Entry->ID->Render = false;
+    Button->Icon->ID->Render = false;
+    if(Button->ToggleIcon) Button->ToggleIcon->ID->Render = false;
 }
 
 inline void
 SetButtonActive(button *Button, b32 SetActive)
 {
-    Get(Button->Entry)->Render = SetActive;
-    Get(Button->Icon)->Render = SetActive;
-    if(Button->ToggleIcon) Get(Button->ToggleIcon)->Render = SetActive;
+    Button->Entry->ID->Render = SetActive;
+    Button->Icon->ID->Render = SetActive;
+    if(Button->ToggleIcon) Button->ToggleIcon->ID->Render = SetActive;
 }
 
 inline void
@@ -369,9 +369,9 @@ TranslateButton(button *Button, v2 Translation)
 inline void
 SetButtonTranslation(button *Button, v2 T)
 {
-    SetPosition(Button->Entry, T);
-    SetPosition(Button->Icon, T);
-    if(Button->ToggleIcon) SetPosition(Button->ToggleIcon, T);
+    SetLocalPosition(Button->Entry, T);
+    //SetLocalPosition(Button->Icon, T);
+    //if(Button->ToggleIcon) SetLocalPosition(Button->ToggleIcon, T);
 }
 
 inline void
@@ -446,7 +446,7 @@ FixUpEntries(render_entry_list *EntryList)
         }
         else 
         {
-            Entry->ID->ID = It;
+            Entry->ID->ID = Entry;
         }
     }
 }
@@ -481,23 +481,12 @@ RemoveRenderEntry(entry_id *EntryID)
         EntryList->OpenSlots[EntryID_ID] = true;
         EntryList->OpenSlotCount++;
         
-        EntryList->Entries[EntryID->ID].Vertice[0].z = -2; // If this is set, it will be deleted on next sort
-        EntryID->ID = -1;
+        EntryID->ID->Vertice[0].z = -2; // If this is set, it will be deleted on next sort
+        EntryID->ID = 0;
         
         EntryList->_SortingNeeded = true;
     }
 }
-
-// NOTE:: Could also do this. But this might be error prone. 
-// #define Get(EntryID) (GlobalGameState.Renderer.RenderEntryList.Entries+EntryID->ID)
-inline render_entry *
-Get(entry_id *EntryID)
-{
-    render_entry *Result = 0;
-    if(EntryID->ID >= 0) Result = GlobalGameState.Renderer.RenderEntryList.Entries+EntryID->ID;
-    return Result;
-}
-
 internal entry_id *
 CreateRenderEntry(renderer *Renderer, v2 Size, r32 Depth, v2 Position = {}, entry_id *Parent = 0)
 {
@@ -513,7 +502,7 @@ CreateRenderEntry(renderer *Renderer, v2 Size, r32 Depth, v2 Position = {}, entr
                 Result = EntryList->IDs + It; 
                 EntryList->OpenSlots[It] = false;
                 EntryList->OpenSlotCount--;
-                Assert(Result->ID < 0);
+                Assert(Result->ID == 0);
                 break;
             }
         }
@@ -529,7 +518,8 @@ CreateRenderEntry(renderer *Renderer, v2 Size, r32 Depth, v2 Position = {}, entr
     
     render_entry *Entry = EntryList->Entries + EntryList->EntryCount;
     Entry->ID = Result;
-    Result->ID = EntryList->EntryCount++;
+    Result->ID = Entry;
+    EntryList->EntryCount++;
     EntryList->_SortingNeeded = true;
     
     Assert(Result->ID >= 0);
@@ -564,8 +554,8 @@ CreateRenderRect(renderer *Renderer, rect Rect, r32 Depth, entry_id *Parent, v3 
     rect_pe_2D RectPE = RectToRectPE(Rect);
     Result = CreateRenderEntry(Renderer, RectPE.Extends*2, Depth, RectPE.Pos, Parent);
     
-    Get(Result)->Type = renderType_2DRectangle;
-    Get(Result)->Color = Color;
+    Result->ID->Type = renderType_2DRectangle;
+    Result->ID->Color = Color;
     
     return Result;
 }
@@ -575,8 +565,8 @@ CreateRenderRect(renderer *Renderer, v2 Size, r32 Depth, v3 *Color, entry_id *Pa
 {
     entry_id *Result = CreateRenderEntry(Renderer, Size, Depth, {}, Parent);
     
-    Get(Result)->Type = renderType_2DRectangle;
-    Get(Result)->Color = Color;
+    Result->ID->Type = renderType_2DRectangle;
+    Result->ID->Color = Color;
     
     return Result;
 }
@@ -589,8 +579,8 @@ CreateRenderBitmap(renderer *Renderer, rect Rect, r32 Depth, entry_id *Parent, l
     rect_pe_2D RectPE = RectToRectPE(Rect);
     Result = CreateRenderEntry(Renderer, RectPE.Extends*2, Depth, RectPE.Pos, Parent);
     
-    Get(Result)->Type = renderType_2DBitmap;
-    Get(Result)->TexID = CreateGLTexture(Bitmap);
+    Result->ID->Type = renderType_2DBitmap;
+    Result->ID->TexID = CreateGLTexture(Bitmap);
     
     return Result;
 }
@@ -603,8 +593,8 @@ CreateRenderBitmap(renderer *Renderer, rect Rect, r32 Depth, entry_id *Parent, u
     rect_pe_2D RectPE = RectToRectPE(Rect);
     Result = CreateRenderEntry(Renderer, RectPE.Extends*2, Depth, RectPE.Pos, Parent);
     
-    Get(Result)->Type = renderType_2DBitmap;
-    Get(Result)->TexID = BitmapID;
+    Result->ID->Type = renderType_2DBitmap;
+    Result->ID->TexID = BitmapID;
     
     return Result;
 }
@@ -616,8 +606,8 @@ CreateRenderBitmap(renderer *Renderer, v2 Size, r32 Depth, entry_id *Parent, u32
     
     Result = CreateRenderEntry(Renderer, Size, Depth, {}, Parent);
     
-    Get(Result)->Type = renderType_2DBitmap;
-    Get(Result)->TexID = BitmapID;
+    Result->ID->Type = renderType_2DBitmap;
+    Result->ID->TexID = BitmapID;
     
     return Result;
 }
@@ -633,8 +623,8 @@ CreateRenderBitmap(renderer *Renderer, rect Rect, r32 Depth, entry_id *Parent, s
     loaded_bitmap Bitmap = LoadImage_STB(Path->S); 
     Assert(Bitmap.Pixels);
     
-    Get(Result)->Type = renderType_2DBitmap;
-    Get(Result)->TexID = CreateGLTexture(Bitmap);
+    Result->ID->Type = renderType_2DBitmap;
+    Result->ID->TexID = CreateGLTexture(Bitmap);
     FreeImage_STB(Bitmap);
     return Result;
 }
@@ -642,35 +632,36 @@ CreateRenderBitmap(renderer *Renderer, rect Rect, r32 Depth, entry_id *Parent, s
 inline void
 SetTransparency(entry_id *Entry, r32 T)
 {
-    Get(Entry)->Transparency = Clamp01(T);
+    Entry->ID->Transparency = Clamp01(T);
 }
 
 // Transform helper *****************************************************************
 
+
 inline v2
 GetSize(entry_id *Entry)
 {
-    v2 Result = HadamardProduct(GetExtends(Get(Entry)->Vertice)*2, Get(Entry)->Transform.Scale);
+    v2 Result = HadamardProduct(GetExtends(Entry->ID->Vertice)*2, Entry->ID->Transform.Scale);
     return Result;
 }
 
 inline void
 SetSize(entry_id *Entry, v2 SizeInPixel)
 {
-    Get(Entry)->Transform.Scale = HadamardDivision(SizeInPixel, GetExtends(Get(Entry)->Vertice)*2);
+    Entry->ID->Transform.Scale = HadamardDivision(SizeInPixel, GetExtends(Entry->ID->Vertice)*2);
 }
 
 inline v2
 GetScale(entry_id *Entry)
 {
-    v2 Result = Get(Entry)->Transform.Scale;
+    v2 Result = Entry->ID->Transform.Scale;
     return Result;
 }
 
 inline void
 SetScale(entry_id *Entry, v2 Scale)
 {
-    Get(Entry)->Transform.Scale = Scale;
+    Entry->ID->Transform.Scale = Scale;
 }
 
 inline v2
@@ -683,7 +674,7 @@ GetExtends(v3 *RenderRectVertice)
 inline v2
 GetExtends(entry_id *Entry)
 {
-    return GetExtends(Get(Entry)->Vertice);
+    return GetExtends(Entry->ID->Vertice);
 }
 
 inline rect 
@@ -705,8 +696,8 @@ GetPosition(entry_id *Entry)
     v2 Result = {};
     while(Entry)
     {
-        Result += Get(Entry)->Transform.Translation;
-        Entry = Get(Entry)->Parent;
+        Result += Entry->ID->Transform.Translation;
+        Entry = Entry->ID->Parent;
     }
     return Result;
 }
@@ -714,28 +705,28 @@ GetPosition(entry_id *Entry)
 inline void
 SetPosition(entry_id *Entry, v2 NewTranslation)
 {
-    v2 ParentTranslation = (Get(Entry)->Parent) ? GetPosition(Get(Entry)->Parent) : V2(0);
+    v2 ParentTranslation = (Entry->ID->Parent) ? GetPosition(Entry->ID->Parent) : V2(0);
     
-    Get(Entry)->Transform.Translation = NewTranslation - ParentTranslation;
+    Entry->ID->Transform.Translation = NewTranslation - ParentTranslation;
 }
 
 inline v2
 GetLocalPosition(entry_id *Entry)
 {
-    v2 Result = Get(Entry)->Transform.Translation;
+    v2 Result = Entry->ID->Transform.Translation;
     return Result;
 }
 
 inline void
 SetLocalPosition(entry_id *Entry, v2 NewTranslation)
 {
-    Get(Entry)->Transform.Translation = NewTranslation;
+    Entry->ID->Transform.Translation = NewTranslation;
 }
 
 inline void
 Translate(entry_id *Entry, v2 TranslationOffset)
 {
-    Get(Entry)->Transform.Translation += TranslationOffset;
+    Entry->ID->Transform.Translation += TranslationOffset;
 }
 
 // Entry rect relation helper *********************************************************
@@ -745,9 +736,9 @@ HeightBetweenRects(entry_id *RectA, entry_id *RectB)
 {
     r32 Result = 0;
     v3 VA[4];
-    ApplyTransform(Get(RectA), VA);
+    ApplyTransform(RectA->ID, VA);
     v3 VB[4];
-    ApplyTransform(Get(RectB), VB);
+    ApplyTransform(RectB->ID, VB);
     
     if(VA[0].y > VB[2].y)
     {
@@ -766,9 +757,9 @@ WidthBetweenRects(entry_id *RectA, entry_id *RectB)
 {
     r32 Result = 0;
     v3 VA[4];
-    ApplyTransform(Get(RectA), VA);
+    ApplyTransform(RectA->ID, VA);
     v3 VB[4];
-    ApplyTransform(Get(RectB), VB);
+    ApplyTransform(RectB->ID, VB);
     
     if(VA[0].x > VB[2].x)
     {
@@ -787,9 +778,9 @@ CenterXBetweenRects(entry_id *LeftRect, entry_id *RightRect)
 {
     r32 Result = {};
     v3 VA[4];
-    ApplyTransform(Get(LeftRect), VA);
+    ApplyTransform(LeftRect->ID, VA);
     v3 VB[4];
-    ApplyTransform(Get(RightRect), VB);
+    ApplyTransform(RightRect->ID, VB);
     
     Result = VA[2].x + (VB[0].x - VA[2].x)*0.5f;
     
@@ -801,9 +792,9 @@ CenterYBetweenRects(entry_id *BottomRect, entry_id *TopRect)
 {
     r32 Result = {};
     v3 VA[4];
-    ApplyTransform(Get(BottomRect), VA);
+    ApplyTransform(BottomRect->ID, VA);
     v3 VB[4];
-    ApplyTransform(Get(TopRect), VB);
+    ApplyTransform(TopRect->ID, VB);
     
     Result = VA[2].y + (VB[0].y - VA[2].y)*0.5f;
     
@@ -815,9 +806,9 @@ IsLowerThanRect(entry_id *Entry, entry_id *Rect)
 {
     b32 Result = false;
     v3 VE[4];
-    ApplyTransform(Get(Entry), VE);
+    ApplyTransform(Entry->ID, VE);
     v3 VR[4];
-    ApplyTransform(Get(Rect), VR);
+    ApplyTransform(Rect->ID, VR);
     
     if(VE[2].y < VR[0].y)
     {
@@ -832,9 +823,9 @@ IsHigherThanRect(entry_id *Entry, entry_id *Rect)
 {
     b32 Result = false;
     v3 VE[4];
-    ApplyTransform(Get(Entry), VE);
+    ApplyTransform(Entry->ID, VE);
     v3 VR[4];
-    ApplyTransform(Get(Rect), VR);
+    ApplyTransform(Rect->ID, VR);
     
     if(VE[0].y > VR[2].y)
     {
@@ -849,9 +840,9 @@ IsTopShowing(entry_id *Entry, entry_id *Rect)
 {
     b32 Result = false;
     v3 VE[4];
-    ApplyTransform(Get(Entry), VE);
+    ApplyTransform(Entry->ID, VE);
     v3 VR[4];
-    ApplyTransform(Get(Rect), VR);
+    ApplyTransform(Rect->ID, VR);
     
     if(VE[2].y > VR[2].y)
     {
@@ -866,9 +857,9 @@ IsBottomShowing(entry_id *Entry, entry_id *Rect)
 {
     b32 Result = false;
     v3 VE[4];
-    ApplyTransform(Get(Entry), VE);
+    ApplyTransform(Entry->ID, VE);
     v3 VR[4];
-    ApplyTransform(Get(Rect), VR);
+    ApplyTransform(Rect->ID, VR);
     
     if(VE[0].y < VR[0].y)
     {
@@ -883,9 +874,9 @@ IsIntersectingRectButTopShowing(entry_id *Entry, entry_id *Rect)
 {
     b32 Result = false;
     v3 VE[4];
-    ApplyTransform(Get(Entry), VE);
+    ApplyTransform(Entry->ID, VE);
     v3 VR[4];
-    ApplyTransform(Get(Rect), VR);
+    ApplyTransform(Rect->ID, VR);
     
     if(VE[0].y < VR[2].y && 
        VE[2].y > VR[2].y)
@@ -901,9 +892,9 @@ IsIntersectingRectButBottomShowing(entry_id *Entry, entry_id *Rect)
 {
     b32 Result = false;
     v3 VE[4];
-    ApplyTransform(Get(Entry), VE);
+    ApplyTransform(Entry->ID, VE);
     v3 VR[4];
-    ApplyTransform(Get(Rect), VR);
+    ApplyTransform(Rect->ID, VR);
     
     if(VE[2].y > VR[0].y && 
        VE[0].y < VR[0].y)
@@ -945,7 +936,7 @@ ExtractScreenRect(entry_id *Entry)
     rect Result = {};
     
     v3 AdjustedCorners[4];
-    ApplyTransform(Get(Entry), AdjustedCorners);
+    ApplyTransform(Entry->ID, AdjustedCorners);
     
     Result.Min = AdjustedCorners[0].xy;
     Result.Max = AdjustedCorners[2].xy;
@@ -971,7 +962,6 @@ DistanceToRectEdge(entry_id *Entry, v2 Point)
     
     return Result;
 }
-
 
 // Screen size change transform *************************************************
 
@@ -1084,11 +1074,12 @@ PerformScreenTransform(renderer *Renderer)
     
     For(List->Count)
     {
+        if(List->OpenSlots[It]) continue;
         Assert(List->DoScale[It] != scaleAxis_None || List->DoTranslation[It] != fixedTo_None);
         entry_id *Entry = List->Entries[It];
         if(List->DoTranslation[It] != fixedTo_None)
         {
-            Get(Entry)->FixedTo = List->DoTranslation[It];
+            Entry->ID->FixedTo = List->DoTranslation[It];
             v2 Center = List->OriginalPosition[It];
             v2 AnchorP = {0.5f, 0.5f};
             switch(List->DoTranslation[It])
@@ -1116,7 +1107,7 @@ PerformScreenTransform(renderer *Renderer)
             v2 FixedCenter   = HadamardProduct(AnchorP, FixedDim);
             v2 Result        = CurrentCenter - (FixedCenter - Center);
             
-            Get(Entry)->Transform.Translation = Result;// - Center;
+            Entry->ID->Transform.Translation = Result;// - Center;
         }
         
         if(List->DoScale[It] != scaleAxis_None)
@@ -1125,15 +1116,15 @@ PerformScreenTransform(renderer *Renderer)
             if(List->DoScale[It] == scaleAxis_X ||
                List->DoScale[It] == scaleAxis_XY)
             {
-                r32 LeftDist  = Get(Entry)->Vertice[0].x;
-                r32 RightDist = FixedDim.x - Get(Entry)->Vertice[2].x;
+                r32 LeftDist  = Entry->ID->Vertice[0].x;
+                r32 RightDist = FixedDim.x - Entry->ID->Vertice[2].x;
                 NewSize.x = Max(0.0f, CurrentDim.x - (LeftDist + RightDist));
             }
             if(List->DoScale[It] == scaleAxis_Y ||
                List->DoScale[It] == scaleAxis_XY)
             {
-                r32 DownDist  = Get(Entry)->Vertice[0].y;
-                r32 UpDist    = FixedDim.y - Get(Entry)->Vertice[2].y;
+                r32 DownDist  = Entry->ID->Vertice[0].y;
+                r32 UpDist    = FixedDim.y - Entry->ID->Vertice[2].y;
                 NewSize.y = Max(0.0f, CurrentDim.y - (DownDist + UpDist));
             }
             SetSize(Entry, NewSize);
@@ -1143,34 +1134,61 @@ PerformScreenTransform(renderer *Renderer)
 
 // Render Text********************************************************
 
+internal render_entry
+CreateRenderTextEntry(renderer *Renderer, v2 Extends, r32 Depth, u32 BitmapID, v3 *Color, entry_id *Parent = 0)
+{
+    render_entry Result = {};
+    
+    Result.Type = renderType_Text;
+    Result.Render = true;
+    Result.Transform = {};
+    Result.Transform.Scale = {1,1};
+    Result.Vertice[0] = {-Extends.x, -Extends.y, Depth};
+    Result.Vertice[1] = {-Extends.x,  Extends.y, Depth};
+    Result.Vertice[2] = { Extends.x,  Extends.y, Depth};
+    Result.Vertice[3] = { Extends.x, -Extends.y, Depth};
+    Result.Parent = Parent;
+    Result.Transparency = 1.0f;
+    Result.Color = Color;
+    Result.TexID = BitmapID;
+    
+    return Result;
+}
+
 internal void
 CreateRenderText(renderer *Renderer, render_text_atlas *Atlas, string_c *Text, 
                  v3 *Color, render_text *ResultText, r32 ZValue, entry_id *Parent, v2 StartP)
 {
-    if(ResultText->RenderEntries == 0)
-    {
-        ResultText->RenderEntries = PushArrayOnBucket(&GlobalGameState.Bucket.Fixed, MAX_CHARACTER_PER_TEXT_INFO, entry_id *);
-        ResultText->StartPointOffset = PushArrayOnBucket(&GlobalGameState.Bucket.Fixed, MAX_CHARACTER_PER_TEXT_INFO, v2);
-    }
     ResultText->Count = 0;
-    if(Parent) StartP += GetPosition(Parent); // RENDERER::NEW
+    if(Parent) StartP += GetPosition(Parent);
+    ResultText->StartP = StartP;
     ResultText->CurrentP = StartP;
-    ResultText->StartP   = StartP;
     r32 DepthOffset = ZValue;
     
+    ResultText->Base = CreateRenderBitmap(Renderer, V2(0), DepthOffset, Parent, Atlas->GLID);
+    SetPosition(ResultText->Base, StartP);
+    ResultText->Base->ID->Type = renderType_Text;
+    ResultText->Base->ID->Text = ResultText;
+    Parent = ResultText->Base;
+    
+    if(ResultText->MaxCount == 0)
+    {
+        ResultText->MaxCount         = Max(CHARACTERS_PER_TEXT_INFO, Text->Pos+1);
+        ResultText->RenderEntries    = PushArrayOnBucket(&GlobalGameState.Bucket.Fixed, ResultText->MaxCount, render_entry);
+        ResultText->StartPointOffset = PushArrayOnBucket(&GlobalGameState.Bucket.Fixed, ResultText->MaxCount, v2);
+    }
+    // TODO:: Maybe when this happens increase the size? With current allocater system
+    // this would not work very well. But once it changed... maybe.
+    Assert(Text->Pos < ResultText->MaxCount); 
+    
+    // Calculate baseline offset positions
     v2 TP = StartP;
     stbtt_aligned_quad TestQ;
     stbtt_GetBakedQuad(Atlas->CharData, Atlas->Bitmap.Width, Atlas->Bitmap.Height, 'o'-32, &TP.x, &TP.y, &TestQ, 1);
     r32 NewBaseline = TestQ.y0;
     r32 OldBaseline = TestQ.y1;
     
-    ResultText->RenderEntries[ResultText->Count] = CreateRenderRect(Renderer, V2(0), DepthOffset, Color, Parent);
-    Assert(Parent && Parent->ID < (i32)Renderer->RenderEntryList.MaxCount);
-    Parent = ResultText->RenderEntries[ResultText->Count++];
-    Assert(Parent && Parent->ID < (i32)Renderer->RenderEntryList.MaxCount);
-    
     v2 BaseP = {};
-    Assert(Text->Pos < MAX_CHARACTER_PER_TEXT_INFO-1);
     For(Text->Pos)
     {
         u8 NextSymbol = Text->S[It];
@@ -1194,21 +1212,20 @@ CreateRenderText(renderer *Renderer, render_text_atlas *Atlas, string_c *Text,
             
             rect Rect = {{A.x0, A.y0}, {A.x1, A.y1}};
             rect_pe RectPE = RectToRectPE(Rect);
-            ResultText->RenderEntries[ResultText->Count] = CreateRenderBitmap(Renderer, RectPE.Extends*2, 
-                                                                              DepthOffset, Parent, Atlas->GLID);
-            entry_id *Entry  = ResultText->RenderEntries[ResultText->Count++];
-            SetPosition(Entry, GetCenter(Rect));
+            ResultText->RenderEntries[ResultText->Count] = CreateRenderTextEntry(Renderer, RectPE.Extends, DepthOffset, 
+                                                                                 Atlas->GLID, Color, Parent);
+            render_entry *Entry  = ResultText->RenderEntries+ResultText->Count++;
+            entry_id EntryID = {Entry};
+            SetPosition(&EntryID, GetCenter(Rect));
             
-            r32 DistToBaseline = GetRect(Entry).Max.y - OldBaseline;
-            r32 BaselineOffset = GetRect(Entry).Min.y - NewBaseline;
-            Translate(Entry, V2(0, -(BaselineOffset + DistToBaseline)));
+            r32 DistToBaseline = GetRect(&EntryID).Max.y - OldBaseline;
+            r32 BaselineOffset = GetRect(&EntryID).Min.y - NewBaseline;
+            Translate(&EntryID, V2(0, -(BaselineOffset + DistToBaseline)));
             
-            Get(Entry)->TexCoords[0] = {A.s0, A.t1};
-            Get(Entry)->TexCoords[1] = {A.s0, A.t0};
-            Get(Entry)->TexCoords[2] = {A.s1, A.t0};
-            Get(Entry)->TexCoords[3] = {A.s1, A.t1};
-            
-            Get(Entry)->Color = Color;
+            Entry->TexCoords[0] = {A.s0, A.t1};
+            Entry->TexCoords[1] = {A.s0, A.t0};
+            Entry->TexCoords[2] = {A.s1, A.t0};
+            Entry->TexCoords[3] = {A.s1, A.t1};
             
             DepthOffset -= 0.000001f;
         }
@@ -1219,75 +1236,67 @@ CreateRenderText(renderer *Renderer, render_text_atlas *Atlas, string_c *Text,
     }
 }
 
-inline v2
-GetLetterPosition(render_text *Text, u32 LetterID)
+inline void
+SetPosition(render_text *Text, v2 P)
 {
-    v2 Result = GetPosition(Text->RenderEntries[LetterID]);
-    
+    if(Text->Base == 0) return;
+    SetPosition(Text->Base, P);
+}
+
+inline void
+SetLocalPosition(render_text *Text, v2 P)
+{
+    if(Text->Base == 0) return;
+    SetLocalPosition(Text->Base, P);
+}
+
+inline void
+SetPositionX(render_text *Text, r32 X)
+{
+    if(Text->Base == 0) return;
+    SetPosition(Text->Base, V2(X, GetPosition(Text->Base).y));
+}
+
+inline void
+SetPositionY(render_text *Text, r32 Y)
+{
+    if(Text->Base == 0) return;
+    SetPosition(Text->Base, V2(GetPosition(Text->Base).x, Y));
+}
+
+inline void
+Translate(render_text *Text, v2 Translation)
+{
+    if(Text->Base == 0) return;
+    Translate(Text->Base, Translation);
+}
+
+inline v2
+GetPosition(render_text *Text, u32 LetterID)
+{
+    Assert(LetterID < Text->Count);
+    v2 Result = {};
+    entry_id EntryID = {Text->RenderEntries+LetterID};
+    Result = GetPosition(&EntryID);
     return Result;
 }
 
 inline void
-SetPosition(render_text *Info, v2 P)
+SetRenderText(render_text *Text, b32 Render)
 {
-    if(Info->Count == 0) return;
-    SetPosition(Info->RenderEntries[0], P);
-}
-
-inline void
-SetLocalPosition(render_text *Info, v2 P)
-{
-    if(Info->Count == 0) return;
-    SetLocalPosition(Info->RenderEntries[0], P);
-}
-
-inline void
-SetPositionX(render_text *Info, r32 X)
-{
-    if(Info->Count == 0) return;
-    SetPosition(Info->RenderEntries[0], V2(X, GetPosition(Info->RenderEntries[0]).y));
-}
-
-inline void
-SetPositionY(render_text *Info, r32 Y)
-{
-    if(Info->Count == 0) return;
-    SetPosition(Info->RenderEntries[0], V2(GetPosition(Info->RenderEntries[0]).x, Y));
-}
-
-inline void
-Translate(render_text *Info, v2 Translation)
-{
-    if(Info->Count == 0) return;
-    Translate(Info->RenderEntries[0], Translation);
-}
-
-inline v2
-GetPosition(render_text *Info, u32 ID)
-{
-    Assert(ID < Info->Count);
-    v2 Result = GetPosition(Info->RenderEntries[ID]);
-    return Result;
-}
-
-inline void
-SetIfTextShouldRender(render_text *Text, b32 Render)
-{
-    For(Text->Count)
-    {
-        Get(Text->RenderEntries[It])->Render = Render;
-    }
+    if(Text->Base == 0) return;
+    Text->Base->ID->Render = Render;
 }
 
 inline void 
 RemoveRenderText(render_text *Text)
 {
-    For(Text->Count) 
-    {
-        RemoveRenderEntry(Text->RenderEntries[It]);
-        Text->RenderEntries[It] = 0;
-    }
     Text->Count = 0;
+    if(Text->Base) 
+    {
+        RemoveRenderEntry(Text->Base);
+        Text->Base = 0;
+    }
 }
 
 inline void
@@ -1295,7 +1304,7 @@ SetTransparency(render_text *Text, r32 T)
 {
     For(Text->Count)
     {
-        Get(Text->RenderEntries[It])->Transparency = Clamp01(T);
+        Text->RenderEntries[It].Transparency = Clamp01(T);
     }
 }
 
@@ -1304,10 +1313,9 @@ SetColor(render_text *Text, v3 *Color)
 {
     For(Text->Count)
     {
-        Get(Text->RenderEntries[It])->Color = Color;
+        Text->RenderEntries[It].Color = Color;
     }
 }
-
 
 // *******************  Sorting algorithms ***********************
 // 3-Way Quicksort ***********************************************
@@ -1425,6 +1433,7 @@ ReadyUpEntryList(render_entry_list *EntryList)
         FixUpEntries(EntryList);
     }
 }
+
 
 
 

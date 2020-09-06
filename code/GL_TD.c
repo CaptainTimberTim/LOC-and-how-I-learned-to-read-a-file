@@ -160,45 +160,82 @@ DisplayBufferInWindow(HDC DeviceContext, renderer *Renderer)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
     
-#if 1
     render_entry_list *EntryList = &Renderer->RenderEntryList;
     if(!EntryList->SuppressSorting) ReadyUpEntryList(EntryList);
-    
     
     for(u32 EntryID = 0; EntryID < EntryList->EntryCount; EntryID++)
     {
         render_entry *RenderEntry = EntryList->Entries + EntryID;
         if (!RenderEntry->Render) continue;
-        Assert(RenderEntry->Type != renderType_NONE);
         
-        if(RenderEntry->Type == renderType_2DBitmap)
+        switch(RenderEntry->Type)
         {
-            glEnable(GL_TEXTURE_2D);
-            glBindTexture(GL_TEXTURE_2D, RenderEntry->TexID);
-        }
-        
-        glBegin(GL_QUADS);
-        v3 V[4];
-        ConvertToGLSpace(Renderer, RenderEntry, V);
-        For(4)
-        {
-            v2 T = RenderEntry->TexCoords[It];
+            case renderType_2DBitmap: 
+            {
+                glEnable(GL_TEXTURE_2D);
+                glBindTexture(GL_TEXTURE_2D, RenderEntry->TexID);
+                
+                glBegin(GL_QUADS);
+                v3 V[4];
+                ConvertToGLSpace(Renderer, RenderEntry, V);
+                For(4)
+                {
+                    v2 T = RenderEntry->TexCoords[It];
+                    
+                    glTexCoord2f(T.x, T.y);
+                    glColor4f(RenderEntry->Color->r, RenderEntry->Color->g, RenderEntry->Color->b, RenderEntry->Transparency);
+                    glVertex3fv(V[It].E);
+                }
+                glEnd();
+                glDisable(GL_TEXTURE_2D);
+            } break;
             
-            glTexCoord2f(T.x, T.y);
-            glColor4f(RenderEntry->Color->r, RenderEntry->Color->g, RenderEntry->Color->b, RenderEntry->Transparency);
-            glVertex3fv(V[It].E);
-        }
-        glEnd();
-        
-        glPopMatrix();
-        
-        if(RenderEntry->Type == renderType_2DBitmap)
-        {
-            glDisable(GL_TEXTURE_2D);
+            case renderType_2DRectangle:
+            {
+                glBegin(GL_QUADS);
+                v3 V[4];
+                ConvertToGLSpace(Renderer, RenderEntry, V);
+                For(4)
+                {
+                    v2 T = RenderEntry->TexCoords[It];
+                    
+                    glTexCoord2f(T.x, T.y);
+                    glColor4f(RenderEntry->Color->r, RenderEntry->Color->g, RenderEntry->Color->b, RenderEntry->Transparency);
+                    glVertex3fv(V[It].E);
+                }
+                glEnd();
+            } break;
+            
+            case renderType_Text:
+            {
+                glEnable(GL_TEXTURE_2D);
+                glBindTexture(GL_TEXTURE_2D, RenderEntry->TexID);
+                glBegin(GL_QUADS);
+                
+                For(RenderEntry->Text->Count)
+                {
+                    render_entry *TextEntry = RenderEntry->Text->RenderEntries+It;
+                    if(!TextEntry->Render) continue;
+                    v3 V[4];
+                    ConvertToGLSpace(Renderer, TextEntry, V);
+                    For(4)
+                    {
+                        v2 T = TextEntry->TexCoords[It];
+                        
+                        glTexCoord2f(T.x, T.y);
+                        glColor4f(TextEntry->Color->r, TextEntry->Color->g, TextEntry->Color->b, TextEntry->Transparency);
+                        glVertex3fv(V[It].E);
+                    }
+                }
+                
+                glEnd();
+                glDisable(GL_TEXTURE_2D);
+            } break;
+            
+            InvalidDefaultCase;
         }
     }
     
-#endif
     
     SwapBuffers(DeviceContext);
 }

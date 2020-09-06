@@ -11,16 +11,16 @@ CreateTextField(renderer *Renderer, memory_bucket_container *Bucket, v2 Size, r3
     Result.NoText    = NewStaticStringCompound(EmptyFieldString);
     
     Result.Background = CreateRenderRect(Renderer, Size, Result.ZValue, BGColor, Parent);
-    Get(Result.Background)->Render = false;
+    Result.Background->ID->Render = false;
     Result.LeftAlign = CreateRenderRect(Renderer, V2(0), Result.ZValue-0.000001f, 
                                         TextColor, Result.Background);
     SetLocalPosition(Result.LeftAlign, V2(-(Size.x-4)/2.0f, 0));
     
     Result.Cursor = CreateRenderRect(Renderer, V2(2, 35), 
-                                     Result.ZValue-0.00001f, Result.TextColor,
+                                     Result.ZValue-0.001f, Result.TextColor,
                                      Result.LeftAlign);
     SetLocalPosition(Result.Cursor, V2(4, 0));
-    Get(Result.Cursor)->Render = false;
+    Result.Cursor->ID->Render = false;
     
     Result.TextString = NewStringCompound(Bucket, 255);
     Result.DoMouseHover = true;
@@ -38,15 +38,15 @@ inline void
 SetTextFieldActive(text_field *TextField, b32 MakeActive)
 {
     TextField->IsActive = MakeActive;
-    Get(TextField->Background)->Render = MakeActive;
-    Get(TextField->Cursor)->Render = MakeActive;
+    TextField->Background->ID->Render = MakeActive;
+    TextField->Cursor->ID->Render = MakeActive;
 }
 
 inline void
 UpdateTextField(renderer *Renderer, text_field *TextField)
 {
     TextField->dBlink = 0.0f;
-    Get(TextField->Cursor)->Render = true;
+    TextField->Cursor->ID->Render = true;
     
     RemoveRenderText(&TextField->Text);
     
@@ -74,7 +74,7 @@ ProcessTextField(renderer *Renderer, r32 dTime, input_info *Input, text_field *T
         // Do cursor blinking
         if(TextField->dBlink >= 1.0f)
         {
-            Get(TextField->Cursor)->Render = !Get(TextField->Cursor)->Render;
+            TextField->Cursor->ID->Render = !TextField->Cursor->ID->Render;
             TextField->dBlink = 0.0f;
         }
         else TextField->dBlink += dTime/BLINK_TIME;
