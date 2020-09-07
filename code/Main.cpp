@@ -595,6 +595,7 @@ WinMain(HINSTANCE Instance,
             UIHolder.Rows = &Rows;
             UIHolder.RowCount = &RowCount;
             
+            b32 DisplayInfoBeforeFileLOCing = false;
             // ********************************************
             // FPS ****************************************
             // ********************************************
@@ -692,9 +693,19 @@ WinMain(HINSTANCE Instance,
                 // *******************************************
                 // Game logic handling************************
                 // *******************************************
+                
                 if(GameState->DoCodeFileSearch)
                 {
                     GameState->DoCodeFileSearch = false;
+                    RemoveFileStuff(&UIHolder);
+                    string_c BeforeLOCInfo = NewStaticStringCompound("Starting to scan folder.\nDepending on the amount of files, this may take some time.");
+                    CreateRenderText(Renderer, Renderer->FontInfo.SmallFont, &BeforeLOCInfo, 
+                                     &TextColor, &FileNamesRT, 0.1f, TextAnchorNames);
+                    DisplayInfoBeforeFileLOCing = true;
+                }
+                else if(DisplayInfoBeforeFileLOCing)
+                {
+                    DisplayInfoBeforeFileLOCing = false;
                     u32 TotalCount = 0;
                     u32 NoWhitespaceCount = 0;
                     CodeFiles.Count = 0;
